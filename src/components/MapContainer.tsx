@@ -1,85 +1,69 @@
 'use client';
 
-import { useEffect, useState, useCallback, memo } from 'react';
-import dynamic from 'next/dynamic';
-
-// Memoize the geocoding function
-const geocodeAddress = async (address: string): Promise<[number, number]> => {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
-    );
-    const data = await response.json();
-
-    if (data && data[0]) {
-      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-    }
-  } catch (error) {
-    console.error('Error geocoding address:', error);
-  }
-  
-  // Fallback to Rockefeller Center
-  return [40.7587, -73.9787];
-};
-
-// Dynamically import the Map component with no SSR
-const Map = dynamic(
-  () => import('./Map'),
-  {
-    ssr: false,
-    loading: () => <LoadingPlaceholder />
-  }
-);
-
-// Memoize the loading placeholder
-const LoadingPlaceholder = memo(function LoadingPlaceholder() {
-  return (
-    <div className="w-full h-[400px] bg-gray-100 rounded-xl flex items-center justify-center">
-      Loading map...
-    </div>
-  );
-});
-
-LoadingPlaceholder.displayName = 'LoadingPlaceholder';
+import { MapContainer as LeafletMapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useEffect, useState } from 'react';
+import L from 'leaflet';
 
 interface MapContainerProps {
   address: string;
+  className?: string;
 }
 
-const MapContainer = memo(function MapContainer({ address }: MapContainerProps) {
-  const [position, setPosition] = useState<[number, number] | null>(null);
-
-  // Memoize the position update function
-  const updatePosition = useCallback(async () => {
-    const pos = await geocodeAddress(address);
-    setPosition(pos);
-  }, [address]);
+export default function MapContainer({ address, className = "w-full h-[400px]" }: MapContainerProps) {
+  const [position, setPosition] = useState<[number, number]>([40.7587, -73.9787]); // Default to Rockefeller Center
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    updatePosition();
-  }, [updatePosition]);
+    if (!address) return;
 
-  if (!position) {
-    return <LoadingPlaceholder />;
+    const geocodeAddress = async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+        );
+        const data = await response.json();
+        
+        if (data && data[0]) {
+          setPosition([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        }
+      } catch (error) {
+        console.error('Error geocoding address:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    geocodeAddress();
+  }, [address]);
+
+  if (isLoading) {
+    return <div className={className}>Loading map...</div>;
   }
 
+  // Fix for Leaflet marker icon
+  const icon = L.icon({
+    iconUrl: '/marker-icon.png',
+    iconRetinaUrl: '/marker-icon-2x.png',
+    shadowUrl: '/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
+  });
+
   return (
-    <div className="w-full">
-      <div className="h-[400px] rounded-xl overflow-hidden">
-        <Map position={position} address={address} />
-      </div>
-      <a
-        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-      >
-        View on Google Maps
-      </a>
-    </div>
+    <LeafletMapContainer 
+      center={position} 
+      zoom={13} 
+      className={className}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <Marker position={position} icon={icon} />
+    </LeafletMapContainer>
   );
-});
-
-MapContainer.displayName = 'MapContainer';
-
-export default MapContainer; 
+} 

@@ -102,7 +102,7 @@ export default function PropertyDetailPage() {
           <p className="text-gray-500">No guidebooks yet. Create your first one!</p>
         ) : (
           <ul className="space-y-4">
-            {property.guidebooks.map((guidebook) => (
+            {property.guidebooks.map((guidebook: any) => (
               <li
                 key={guidebook.guidebookId}
                 className="flex items-center justify-between border-b pb-4 last:border-b-0"

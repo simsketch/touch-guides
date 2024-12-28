@@ -4,10 +4,11 @@ import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request
 ) {
   try {
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -19,7 +20,7 @@ export async function GET(
     // Find the property and verify ownership
     const property = await db
       .collection('properties')
-      .findOne({ _id: new ObjectId(params.id), userId });
+      .findOne({ _id: new ObjectId(id), userId });
 
     if (!property) {
       return new NextResponse('Property not found', { status: 404 });
@@ -40,10 +41,11 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request
 ) {
   try {
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -59,7 +61,7 @@ export async function PUT(
     const result = await db
       .collection('properties')
       .findOneAndUpdate(
-        { _id: new ObjectId(params.id), userId },
+        { _id: new ObjectId(id), userId },
         { $set: { ...updateData, userId } },
         { returnDocument: 'after' }
       );
@@ -83,9 +85,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
 ) {
   try {
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -96,7 +99,7 @@ export async function DELETE(
 
     const result = await db
       .collection('properties')
-      .deleteOne({ _id: new ObjectId(params.id), userId });
+      .deleteOne({ _id: new ObjectId(id), userId });
 
     if (result.deletedCount === 0) {
       return new NextResponse('Property not found', { status: 404 });

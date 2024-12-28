@@ -10,6 +10,7 @@ export interface Guidebook {
   transportation: string;
   groceryStores: string;
   wifiAndElectronics: string;
+  updatedAt: string | Date;
 }
 
 export interface Property {

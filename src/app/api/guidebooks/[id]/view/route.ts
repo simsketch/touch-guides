@@ -3,17 +3,17 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request
 ) {
   try {
-    console.log('Fetching guidebook with ID:', params.id);
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const client = await clientPromise;
     const db = client.db();
 
     // Find the guidebook in the properties collection
     const property = await db.collection('properties').findOne(
-      { 'guidebooks.guidebookId': params.id },
+      { 'guidebooks.guidebookId': id },
       { projection: { 'guidebooks.$': 1 } }
     );
 

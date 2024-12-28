@@ -101,7 +101,7 @@ export default function PropertyList({ properties }: PropertyListProps) {
               <span className="flex-grow">{guidebook.title || 'Untitled Guidebook'}</span>
               <div className="flex gap-4">
                 <Link
-                  href={`/guidebooks/${guidebook.guidebookId}/view`}
+                  href={`/guidebooks/${guidebook.guidebookId}`}
                   className="text-blue-500 hover:text-blue-600 transition-colors duration-300"
                 >
                   View
@@ -184,7 +184,7 @@ export default function PropertyList({ properties }: PropertyListProps) {
               <span>{guidebook.title || 'Untitled Guidebook'}</span>
               <div className="flex gap-4">
                 <Link
-                  href={`/guidebooks/${guidebook.guidebookId}/view`}
+                  href={`/guidebooks/${guidebook.guidebookId}`}
                   className="text-blue-500 hover:text-blue-600 transition-colors duration-300"
                 >
                   View

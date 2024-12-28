@@ -5,9 +5,10 @@ import clientPromise from '@/lib/mongodb';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
 ) {
   try {
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -20,7 +21,7 @@ export async function POST(
     // Find the property and verify ownership
     const property = await db
       .collection('properties')
-      .findOne({ _id: new ObjectId(params.id), userId });
+      .findOne({ _id: new ObjectId(id), userId });
 
     if (!property) {
       return new NextResponse('Property not found', { status: 404 });
@@ -38,7 +39,7 @@ export async function POST(
     const result = await db
       .collection('properties')
       .findOneAndUpdate(
-        { _id: new ObjectId(params.id), userId },
+        { _id: new ObjectId(id), userId },
         { 
           $push: { guidebooks: guidebook },
           $set: { updatedAt: new Date() }

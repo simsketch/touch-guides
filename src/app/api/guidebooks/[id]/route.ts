@@ -1,16 +1,17 @@
 import { auth } from '@clerk/nextjs';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
 ) {
   try {
     const { userId } = auth();
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const data = await request.json();
@@ -22,11 +23,11 @@ export async function PUT(
       .collection('properties')
       .findOne({
         userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
-      return new NextResponse('Guidebook not found', { status: 404 });
+      return NextResponse.json({ error: 'Guidebook not found' }, { status: 404 });
     }
 
     // Update the guidebook within the property
@@ -35,7 +36,7 @@ export async function PUT(
       .findOneAndUpdate(
         {
           userId,
-          'guidebooks.guidebookId': params.id,
+          'guidebooks.guidebookId': id,
         },
         {
           $set: {
@@ -58,66 +59,62 @@ export async function PUT(
       );
 
     if (!result) {
-      return new NextResponse('Failed to update guidebook', { status: 500 });
+      return NextResponse.json({ error: 'Failed to update guidebook' }, { status: 500 });
     }
 
     // Find the updated guidebook in the property
     const updatedGuidebook = result.guidebooks.find(
-      (g: any) => g.guidebookId === params.id
+      (g: any) => g.guidebookId === id
     );
 
     return NextResponse.json(updatedGuidebook);
   } catch (error) {
     console.error('Error updating guidebook:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
-    const { userId } = auth();
-    if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const client = await clientPromise;
     const db = client.db();
 
-    // Find the property containing the guidebook and verify ownership
+    // Find the property containing the guidebook
     const property = await db
       .collection('properties')
       .findOne({
-        userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
-      return new NextResponse('Guidebook not found', { status: 404 });
+      return NextResponse.json({ error: 'Guidebook not found' }, { status: 404 });
     }
 
     // Find the guidebook in the property
     const guidebook = property.guidebooks.find(
-      (g: any) => g.guidebookId === params.id
+      (g: any) => g.guidebookId === id
     );
 
     return NextResponse.json(guidebook);
   } catch (error) {
     console.error('Error fetching guidebook:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
+    const id = request.url.match(/\/guidebooks\/([^\/]+)/)?.[1];
+    console.log('Fetching guidebook with ID:', id);
     const { userId } = auth();
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const client = await clientPromise;
@@ -128,28 +125,28 @@ export async function DELETE(
       .collection('properties')
       .findOne({
         userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
-      return new NextResponse('Guidebook not found', { status: 404 });
+      return NextResponse.json({ error: 'Guidebook not found' }, { status: 404 });
     }
 
     // Remove the guidebook from the property
     const result = await db
       .collection('properties')
       .updateOne(
-        { userId, 'guidebooks.guidebookId': params.id },
-        { $pull: { guidebooks: { guidebookId: params.id } } }
+        { userId, 'guidebooks.guidebookId': id },
+        { $pull: { guidebooks: { guidebookId: id } } } as any
       );
 
     if (result.modifiedCount === 0) {
-      return new NextResponse('Failed to delete guidebook', { status: 500 });
+      return NextResponse.json({ error: 'Failed to delete guidebook' }, { status: 500 });
     }
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting guidebook:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 } 
