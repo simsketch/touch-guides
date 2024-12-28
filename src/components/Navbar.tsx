@@ -4,10 +4,18 @@ import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon } from '@heroicons/react/24/outline';
+
+type UserMetadata = {
+  isPremium?: boolean;
+  stripeCustomerId?: string;
+  subscriptionId?: string;
+};
 
 export default function Navbar() {
   const { user, isLoaded } = useUser();
+  const metadata = user?.publicMetadata as UserMetadata;
+  const isPremium = metadata?.isPremium === true;
 
   return (
     <nav className="bg-white shadow-sm">
@@ -24,12 +32,22 @@ export default function Navbar() {
               <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500" />
             ) : user ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Dashboard
-                </Link>
+                {isPremium ? (
+                  <Link
+                    href="/dashboard"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  >
+                    <SparklesIcon className="h-5 w-5 mr-1" />
+                    Upgrade to Premium
+                  </Link>
+                )}
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center space-x-2 rounded-full bg-white p-1 hover:bg-gray-50 focus:outline-none">
                     {user.imageUrl ? (
@@ -55,7 +73,14 @@ export default function Navbar() {
                   >
                     <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <div className="px-4 py-2 border-b">
-                        <p className="text-sm font-medium text-gray-900">{user.fullName}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.fullName}
+                          {isPremium && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                              Premium
+                            </span>
+                          )}
+                        </p>
                         <p className="text-sm text-gray-500">{user.emailAddresses[0]?.emailAddress}</p>
                       </div>
                       <Menu.Item>

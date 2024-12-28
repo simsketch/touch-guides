@@ -140,7 +140,7 @@ export async function DELETE(
       .collection('properties')
       .updateOne(
         { userId, 'guidebooks.guidebookId': params.id },
-        { $pull: { guidebooks: { guidebookId: params.id } } }
+        { $pull: { guidebooks: { guidebookId: params.id } } } as any
       );
 
     if (result.modifiedCount === 0) {

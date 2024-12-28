@@ -101,7 +101,6 @@ export default function GuidebookMapPage() {
             <h2 className="text-xl font-semibold mb-4">Property Location</h2>
             <MapContainer 
               address={guidebook.address || "30 Rockefeller Plaza, New York, NY 10111"}
-              className="w-full h-[400px] rounded-xl"
             />
           </div>
         </div>

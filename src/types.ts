@@ -23,8 +23,5 @@ export interface Guidebook {
 export interface Property {
   propertyId: string;
   name: string;
-  guidebooks: Array<{
-    guidebookId: string;
-    title: string;
-  }>;
+  guidebooks: Array<Guidebook>;
 } 

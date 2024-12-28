@@ -24,7 +24,6 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
   if (!isMounted) {
     return <div className="min-h-screen" />;
   }
-
   return (
     <div className="relative min-h-screen">
       {/* Hero Image Section */}
