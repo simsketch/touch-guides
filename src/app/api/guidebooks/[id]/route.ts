@@ -51,6 +51,7 @@ export async function PUT(
             'guidebooks.$.transportation': data.transportation,
             'guidebooks.$.groceryStores': data.groceryStores,
             'guidebooks.$.wifiAndElectronics': data.wifiAndElectronics,
+            'guidebooks.$.coverImage': data.coverImage,
             'guidebooks.$.updatedAt': new Date(),
           },
         },

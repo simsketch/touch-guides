@@ -1,9 +1,9 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -11,9 +11,16 @@ export default function PricingPage() {
   const { user, isLoaded } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const error = searchParams.get('error');
   const message = searchParams.get('message');
   const success = searchParams.get('success');
+
+  const metadata = user?.publicMetadata as {
+    isPremium?: boolean;
+    subscriptionId?: string;
+    subscriptionStatus?: string;
+  };
 
   const handleSubscribe = async () => {
     try {
@@ -41,6 +48,32 @@ export default function PricingPage() {
     } catch (error) {
       console.error('Error:', error);
       alert('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/stripe/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscriptionId: metadata.subscriptionId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cancel subscription');
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      alert('Failed to cancel subscription. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +113,9 @@ export default function PricingPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800">Payment Successful</h3>
+                <h3 className="text-sm font-medium text-green-800">Success</h3>
                 <div className="mt-2 text-sm text-green-700">
-                  Thank you for subscribing to TouchGuides Premium!
+                  {metadata?.isPremium ? 'Your subscription has been canceled.' : 'Thank you for subscribing to TouchGuides Premium!'}
                 </div>
               </div>
             </div>
@@ -91,10 +124,12 @@ export default function PricingPage() {
 
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Upgrade to Premium
+            {metadata?.isPremium ? 'Manage Subscription' : 'Upgrade to Premium'}
           </h2>
           <p className="mt-4 text-xl text-gray-600">
-            Get full access to all features and create unlimited guidebooks
+            {metadata?.isPremium 
+              ? 'Your premium features will remain active until the end of your billing period.'
+              : 'Get full access to all features and create unlimited guidebooks'}
           </p>
         </div>
 
@@ -137,14 +172,25 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <button
-                onClick={handleSubscribe}
-                disabled={isLoading || !user}
-                className={`mt-8 w-full rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white transition-all
-                  ${isLoading ? 'opacity-75 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-              >
-                {isLoading ? 'Processing...' : user ? 'Upgrade Now' : 'Sign in to Subscribe'}
-              </button>
+              {metadata?.isPremium ? (
+                <button
+                  onClick={handleCancelSubscription}
+                  disabled={isLoading || metadata.subscriptionStatus === 'canceling'}
+                  className="mt-8 w-full rounded-lg bg-red-600 px-4 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : 
+                   metadata.subscriptionStatus === 'canceling' ? 'Cancellation Pending' : 
+                   'Cancel Subscription'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubscribe}
+                  disabled={isLoading || !user}
+                  className="mt-8 w-full rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : user ? 'Upgrade Now' : 'Sign in to Subscribe'}
+                </button>
+              )}
             </div>
           </div>
         </div>

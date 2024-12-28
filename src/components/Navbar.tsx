@@ -4,12 +4,13 @@ import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 
 type UserMetadata = {
   isPremium?: boolean;
   stripeCustomerId?: string;
   subscriptionId?: string;
+  subscriptionStatus?: string;
 };
 
 export default function Navbar() {
@@ -32,20 +33,18 @@ export default function Navbar() {
               <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500" />
             ) : user ? (
               <>
-                {isPremium ? (
+                <Link
+                  href="/pricing"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Pricing
+                </Link>
+                {isPremium && (
                   <Link
                     href="/dashboard"
                     className="text-gray-600 hover:text-gray-900"
                   >
                     Dashboard
-                  </Link>
-                ) : (
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                  >
-                    <SparklesIcon className="h-5 w-5 mr-1" />
-                    Upgrade to Premium
                   </Link>
                 )}
                 <Menu as="div" className="relative">
@@ -92,7 +91,20 @@ export default function Navbar() {
                             } flex items-center px-4 py-2 text-sm text-gray-700`}
                           >
                             <Cog6ToothIcon className="mr-3 h-5 w-5 text-gray-400" />
-                            Settings
+                            Profile Settings
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/pricing"
+                            className={`${
+                              active ? 'bg-gray-50' : ''
+                            } flex items-center px-4 py-2 text-sm text-gray-700`}
+                          >
+                            <CreditCardIcon className="mr-3 h-5 w-5 text-gray-400" />
+                            Subscription
                           </Link>
                         )}
                       </Menu.Item>
@@ -115,11 +127,19 @@ export default function Navbar() {
                 </Menu>
               </>
             ) : (
-              <SignInButton mode="modal">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                  Sign In
-                </button>
-              </SignInButton>
+              <>
+                <Link
+                  href="/pricing"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Pricing
+                </Link>
+                <SignInButton mode="modal">
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </>
             )}
           </div>
         </div>

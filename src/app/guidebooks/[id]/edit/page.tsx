@@ -141,6 +141,21 @@ export default function GuidebookEditPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cover Image URL
+            </label>
+            <input
+              {...register('coverImage')}
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Enter a URL for the cover image of your guidebook. This will be displayed at the top of your guidebook.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Address
             </label>
             <input
