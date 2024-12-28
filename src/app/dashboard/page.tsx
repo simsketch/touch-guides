@@ -44,7 +44,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Properties</h1>
+        <h1 className="text-3xl font-bold">Dashboard - My Properties</h1>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleAddProperty}

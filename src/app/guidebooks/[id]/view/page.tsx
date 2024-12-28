@@ -70,7 +70,7 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
       </div>
 
       {/* Get Started Button */}
-      <div className="absolute bottom-32 left-0 right-0 flex justify-center">
+      <div className="absolute bottom-64 left-0 right-0 flex justify-center">
         <button 
           onClick={() => {
             const element = document.getElementById('welcome');
