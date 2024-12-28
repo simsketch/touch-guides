@@ -6,7 +6,7 @@ import { Guidebook } from '@/types';
 import { Inter } from 'next/font/google';
 import BottomNav from '@/components/BottomNav';
 import Image from 'next/image';
-import { HomeIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, EnvelopeIcon, ShareIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -16,14 +16,26 @@ const inter = Inter({ subsets: ['latin'] });
 function HomeContent({ guidebook }: { guidebook: Guidebook }) {
   const { user, isLoaded } = useUser();
   const [isMounted, setIsMounted] = useState(false);
+  const [showShareToast, setShowShareToast] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShowShareToast(true);
+      setTimeout(() => setShowShareToast(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+    }
+  };
+
   if (!isMounted) {
     return <div className="min-h-screen" />;
   }
+
   return (
     <div className="relative min-h-screen">
       {/* Hero Image Section */}
@@ -39,14 +51,23 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
         
         {/* Content Overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
-          {isLoaded && user && (
-            <Link
-              href={`/guidebooks/${guidebook.guidebookId}/edit`}
-              className="absolute top-4 right-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all"
+          <div className="absolute top-4 right-4 flex space-x-2">
+            <button
+              onClick={handleShare}
+              className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all flex items-center space-x-2"
             >
-              Edit Guidebook
-            </Link>
-          )}
+              <ShareIcon className="w-5 h-5" />
+              <span>Share</span>
+            </button>
+            {isLoaded && user && (
+              <Link
+                href={`/guidebooks/${guidebook.guidebookId}/edit`}
+                className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all"
+              >
+                Edit Guidebook
+              </Link>
+            )}
+          </div>
           <div className="w-20 h-20 mb-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
             <HomeIcon className="w-10 h-10" />
           </div>
@@ -66,6 +87,15 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Share Toast */}
+      <div
+        className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full transition-all duration-200 ${
+          showShareToast ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        URL copied to clipboard!
       </div>
 
       {/* Get Started Button */}
