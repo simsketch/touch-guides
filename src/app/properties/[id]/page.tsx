@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import Link from 'next/link';
 import { useState } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -54,9 +55,7 @@ export default function PropertyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+<LoadingSpinner />
     );
   }
 

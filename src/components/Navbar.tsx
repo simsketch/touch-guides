@@ -6,7 +6,8 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-
+import { useRouter } from 'next/navigation';
+import LoadingSpinner from './LoadingSpinner';
 
 type UserMetadata = {
   isPremium?: boolean;
@@ -16,39 +17,121 @@ type UserMetadata = {
 };
 
 export default function Navbar() {
+  const router = useRouter();
   const { user, isLoaded } = useUser();
   const metadata = user?.publicMetadata as UserMetadata;
   const isPremium = metadata?.isPremium === true;
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-xl font-bold text-blue-600">
-            <div className="flex items-center">
-              <Image src="/logo.png" alt="TouchGuides Logo" width={250} height={56} className="h-8 w-auto mr-2" />
-            </div>
-          </Link>
+    <>
+      <style jsx global>{`
+        @keyframes login-loading-bar {
+          0% {
+            left: -35%;
+            right: 100%
+          }
 
-          <div className="flex items-center space-x-4">
-            {!isLoaded ? (
-              <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500" />
-            ) : user ? (
-              <>
-                <Link
-                  href="/pricing"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Pricing
-                </Link>
-                {isPremium && (
+          100%,60% {
+            left: 100%;
+            right: -90%
+          }
+        }
+
+        @keyframes login-loading-bar-short {
+          0% {
+            left: -200%;
+            right: 100%
+          }
+
+          100%,60% {
+            left: 107%;
+            right: -8%
+          }
+        }
+
+        .login-loading-screen {
+          background: #f5f5f5;
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 12;
+          text-align: center
+        }
+
+        .login-loading-screen .login-loading-bar {
+          position: relative;
+          height: 64px;
+          display: block;
+          width: 100%;
+          background-color: #e8f0ff;
+          background-clip: padding-box;
+          overflow: hidden
+        }
+
+        .login-loading-screen .login-loading-bar::after,
+        .login-loading-screen .login-loading-bar::before {
+          content: '';
+          background-color: #4f46e5;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          will-change: left,right;
+          animation: login-loading-bar 2.1s cubic-bezier(.65,.815,.735,.395) infinite
+        }
+
+        .login-loading-screen .login-loading-bar::after {
+          animation: login-loading-bar-short 2.1s cubic-bezier(.165,.84,.44,1) infinite;
+          animation-delay: 1.15s
+        }
+
+        .login-loading-spacer {
+          height: 100vh
+        }
+      `}</style>
+
+      <nav className="bg-white shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="text-xl font-bold text-blue-600">
+              <div className="flex items-center">
+                <Image src="/logo.png" alt="TouchGuides Logo" width={250} height={56} className="h-8 w-auto mr-2" />
+              </div>
+            </Link>
+
+            <div className="flex-1 flex space-x-6 ml-10">
+              {!isLoaded ? null : user ? (
+                isPremium && (
                   <Link
                     href="/dashboard"
                     className="text-gray-600 hover:text-gray-900"
                   >
                     Dashboard
                   </Link>
-                )}
+                )
+              ) : (
+                <Link
+                  href="/pricing"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Pricing
+                </Link>
+              )}
+                <Link
+                  href="https://touchguides.com/contact"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Support
+                </Link>
+            </div>
+
+            <div className="flex items-center space-x-6">
+              {!isLoaded ? (
+                <div className="w-24">
+                  <LoadingSpinner />
+                </div>
+              ) : user ? (
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center space-x-2 rounded-full bg-white p-1 hover:bg-gray-50 focus:outline-none">
                     {user.imageUrl ? (
@@ -129,25 +212,24 @@ export default function Navbar() {
                     </Menu.Items>
                   </Transition>
                 </Menu>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/pricing"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Pricing
-                </Link>
-                <SignInButton mode="modal">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </>
-            )}
+              ) : (
+                <>
+                  <SignInButton mode="modal" redirectUrl="/dashboard">
+                    <button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                      Sign Up
+                    </button>
+                  </SignInButton>
+                  <SignInButton mode="modal" redirectUrl="/dashboard">
+                    <button className="text-gray-600 hover:text-gray-900">
+                      Log In
+                    </button>
+                  </SignInButton>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 } 

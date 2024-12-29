@@ -128,7 +128,7 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
           <h1 className="text-4xl font-bold mb-4 text-center">{guidebook.title}</h1>
           <div className="flex flex-col items-center gap-4 mb-6">
             <p className="text-xl text-white/90 text-center">
-              {guidebook.address || 'Address not provided'}
+              {guidebook.address}
             </p>
             {guidebook.contactEmail && (
               <a 
@@ -182,7 +182,7 @@ export default function GuidebookViewPage() {
   const { data: guidebook, isLoading } = useQuery<Guidebook>({
     queryKey: ['guidebook', params.id],
     queryFn: async () => {
-      const response = await fetch(`/api/guidebooks/${params.id}`);
+      const response = await fetch(`/api/guidebooks/${params.id}/view`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

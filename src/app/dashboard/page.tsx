@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
 import PropertyList from '@/components/PropertyList';
 import { useProperties } from '@/hooks/useProperties';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -14,16 +15,14 @@ export default function DashboardPage() {
   if (!user && !isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg">Please sign in to access your dashboard.</p>
+        <LoadingSpinner />
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+      <LoadingSpinner />
     );
   }
 

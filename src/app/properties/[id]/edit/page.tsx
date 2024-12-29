@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function PropertyEditPage() {
   const { id } = useParams();
@@ -64,9 +65,7 @@ export default function PropertyEditPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+<LoadingSpinner />
     );
   }
 

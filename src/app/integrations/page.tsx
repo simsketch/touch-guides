@@ -1,5 +1,6 @@
 'use client';
 
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
 
@@ -69,7 +70,7 @@ export default function IntegrationsPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg">Please sign in to access integrations.</p>
+        <LoadingSpinner />
       </div>
     );
   }

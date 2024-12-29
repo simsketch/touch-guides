@@ -5,13 +5,20 @@ import { Inter } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Providers from '@/components/Providers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Metadata } from 'next'
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'TouchGuides - Digital Guidebooks for Vacation Homes',
   description: 'Create and manage digital guidebooks for your vacation rental properties',
-};
+  icons: {
+    icon: '/icon.png', // place icon.png in the public folder
+    shortcut: '/shortcut-icon.png',
+    apple: '/apple-icon.png',
+    // other icon sizes if needed
+  }
+}
 
 export default function RootLayout({
   children,

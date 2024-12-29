@@ -11,12 +11,18 @@ export default function HomePage() {
 
   useEffect(() => {
     // Check if we're not on localhost
-    const hostname = window.location.hostname;
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      router.push('/dashboard');
-    }
+    // const hostname = window.location.hostname;
+    // if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    //   router.push('/dashboard');
+    // }
+    // just redirect for now
+    router.push('/dashboard');
   }, [router]);
-
+  return (
+    <div id="loginLoadingScreen" className="login-loading-screen">
+      <div className="login-loading-bar"></div>
+    </div>
+  )
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
