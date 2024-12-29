@@ -71,7 +71,7 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
           <div className="w-20 h-20 mb-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
             <HomeIcon className="w-10 h-10" />
           </div>
-          <h1 className="text-4xl font-bold mb-4">{guidebook.title}</h1>
+          <h1 className="text-4xl font-bold mb-4 text-center">{guidebook.title}</h1>
           <div className="flex flex-col items-center gap-4 mb-6">
             <p className="text-xl text-white/90 text-center">
               {guidebook.address || 'Address not provided'}

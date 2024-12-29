@@ -1,8 +1,28 @@
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
+import { ObjectId, Document } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 import { extractIdFromUrl } from '@/lib/url-helpers';
+
+interface GuidebookDocument extends Document {
+  guidebookId: string;
+  title: string;
+  address: string;
+  contactEmail: string;
+  coverImage: string;
+  checkInCheckOut: string;
+  directionsToProperty: string;
+  contactInformation: string;
+  quirksOfTheHome: string;
+  wifiAndElectronics: string;
+  houseRules: string;
+  placesToEat: string;
+  thingsToDo: string;
+  transportation: string;
+  groceryStores: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export async function POST(request: Request) {
   try {
@@ -29,10 +49,23 @@ export async function POST(request: Request) {
       return new NextResponse('Property not found', { status: 404 });
     }
 
-    // Create the guidebook
-    const guidebook = {
-      ...data,
+    // Create the guidebook with all fields
+    const guidebook: GuidebookDocument = {
       guidebookId: new ObjectId().toString(),
+      title: data.title || '',
+      address: data.address || '',
+      contactEmail: data.contactEmail || '',
+      coverImage: data.coverImage || '',
+      checkInCheckOut: data.checkInCheckOut || '',
+      directionsToProperty: data.directionsToProperty || '',
+      contactInformation: data.contactInformation || '',
+      quirksOfTheHome: data.quirksOfTheHome || '',
+      wifiAndElectronics: data.wifiAndElectronics || '',
+      houseRules: data.houseRules || '',
+      placesToEat: data.placesToEat || '',
+      thingsToDo: data.thingsToDo || '',
+      transportation: data.transportation || '',
+      groceryStores: data.groceryStores || '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -42,10 +75,7 @@ export async function POST(request: Request) {
       .collection('properties')
       .findOneAndUpdate(
         { _id: new ObjectId(id), userId },
-        { 
-          $push: { guidebooks: guidebook },
-          $set: { updatedAt: new Date() }
-        },
+        { $push: { guidebooks: guidebook } } as any,
         { returnDocument: 'after' }
       );
 

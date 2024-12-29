@@ -2,9 +2,20 @@
 
 import { SignInButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const { user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if we're not on localhost
+    const hostname = window.location.hostname;
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen">
