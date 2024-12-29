@@ -6,7 +6,7 @@ import { Guidebook } from '@/types';
 import { Inter } from 'next/font/google';
 import BottomNav from '@/components/BottomNav';
 import Image from 'next/image';
-import { HomeIcon, EnvelopeIcon, ShareIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, EnvelopeIcon, ShareIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -17,6 +17,8 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
   const { user, isLoaded } = useUser();
   const [isMounted, setIsMounted] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -29,6 +31,41 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
       setTimeout(() => setShowShareToast(false), 2000);
     } catch (err) {
       console.error('Failed to copy URL:', err);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsPdfLoading(true);
+      const response = await fetch(`/api/guidebooks/${guidebook.guidebookId}/pdf`);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate PDF');
+      }
+
+      if (response.headers.get('Content-Type') === 'application/pdf') {
+        // It's a PDF, download it
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${guidebook.title.replace(/\s+/g, '-').toLowerCase()}-guide.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        // It's an error response
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate PDF');
+      }
+    } catch (err) {
+      console.error('Failed to download PDF:', err);
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 3000);
+    } finally {
+      setIsPdfLoading(false);
     }
   };
 
@@ -52,6 +89,23 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
         {/* Content Overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
           <div className="absolute top-4 right-4 flex space-x-2">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={isPdfLoading}
+              className="hidden px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all flex items-center space-x-2 disabled:opacity-50"
+            >
+              {isPdfLoading ? (
+                <>
+                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <DocumentArrowDownIcon className="w-5 h-5" />
+                  <span>Download PDF</span>
+                </>
+              )}
+            </button>
             <button
               onClick={handleShare}
               className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all flex items-center space-x-2"
@@ -96,6 +150,15 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
         }`}
       >
         URL copied to clipboard!
+      </div>
+
+      {/* Error Toast */}
+      <div
+        className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/80 text-white px-4 py-2 rounded-full transition-all duration-200 ${
+          showErrorToast ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        Failed to generate PDF. Please try again.
       </div>
 
       {/* Get Started Button */}

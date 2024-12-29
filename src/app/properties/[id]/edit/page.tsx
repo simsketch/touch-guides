@@ -71,40 +71,38 @@ export default function PropertyEditPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 gradient-bg min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
-          Edit Property
-        </h1>
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 animated-border rounded-full"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            className="button-gradient text-white px-4 py-2 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
-          </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Edit Property</h1>
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              className="px-4 py-2 text-gray-600 hover:text-gray-900"
+              onClick={() => router.back()}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg mb-4">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="glass card-gradient p-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Property Name
@@ -112,31 +110,31 @@ export default function PropertyEditPage() {
               <input
                 type="text"
                 {...register('name', { required: 'Property name is required' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover-lift transition-all"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter property name..."
               />
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 animated-border rounded-full"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="button-gradient text-white px-4 py-2 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              className="px-4 py-2 text-gray-600 hover:text-gray-900"
+              onClick={() => router.back()}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 } 
