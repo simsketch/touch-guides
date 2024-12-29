@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon, CreditCardIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+
 
 type UserMetadata = {
   isPremium?: boolean;
@@ -24,7 +26,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="text-xl font-bold text-blue-600">
             <div className="flex items-center">
-              <img src="/logo.png" alt="TouchGuides Logo" className="h-8 w-auto mr-2" />
+              <Image src="/logo.png" alt="TouchGuides Logo" width={250} height={56} className="h-8 w-auto mr-2" />
             </div>
           </Link>
 
@@ -50,9 +52,11 @@ export default function Navbar() {
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center space-x-2 rounded-full bg-white p-1 hover:bg-gray-50 focus:outline-none">
                     {user.imageUrl ? (
-                      <img
+                      <Image
                         src={user.imageUrl}
                         alt={user.fullName || 'User'}
+                        height={32}
+                        width={32}
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (

@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import { extractIdFromUrl } from '@/lib/url-helpers';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    console.log('Fetching guidebook with ID:', params.id);
+    const id = extractIdFromUrl(request.url);
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Invalid guidebook ID' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Fetching guidebook with ID:', id);
     const client = await clientPromise;
     const db = client.db();
 
     // Find the guidebook in the properties collection
     const property = await db.collection('properties').findOne(
-      { 'guidebooks.guidebookId': params.id },
+      { 'guidebooks.guidebookId': id },
       { projection: { 'guidebooks.$': 1 } }
     );
 

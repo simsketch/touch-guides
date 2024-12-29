@@ -75,7 +75,7 @@ export default function GuidebookMapPage() {
               Map Not Available
             </h1>
             <p className="text-gray-600 text-center leading-relaxed">
-              We couldn't load the map for this guidebook. Please check the URL and try again.
+              We couldn&apos;t load the map for this guidebook. Please check the URL and try again.
             </p>
             <div className="mt-6 flex justify-center">
               <button 

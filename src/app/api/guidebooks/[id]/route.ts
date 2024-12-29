@@ -3,14 +3,22 @@ import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// Helper function to extract ID from URL
+function extractIdFromUrl(url: string): string | null {
+  const match = url.match(/\/guidebooks\/([^\/]+)/);
+  return match ? match[1] : null;
+}
+
+export async function PUT(request: Request) {
   try {
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const id = extractIdFromUrl(request.url);
+    if (!id) {
+      return new NextResponse('Invalid guidebook ID', { status: 400 });
     }
 
     const data = await request.json();
@@ -22,7 +30,7 @@ export async function PUT(
       .collection('properties')
       .findOne({
         userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
@@ -35,7 +43,7 @@ export async function PUT(
       .findOneAndUpdate(
         {
           userId,
-          'guidebooks.guidebookId': params.id,
+          'guidebooks.guidebookId': id,
         },
         {
           $set: {
@@ -64,7 +72,7 @@ export async function PUT(
 
     // Find the updated guidebook in the property
     const updatedGuidebook = result.guidebooks.find(
-      (g: any) => g.guidebookId === params.id
+      (g: any) => g.guidebookId === id
     );
 
     return NextResponse.json(updatedGuidebook);
@@ -74,14 +82,16 @@ export async function PUT(
   }
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const id = extractIdFromUrl(request.url);
+    if (!id) {
+      return new NextResponse('Invalid guidebook ID', { status: 400 });
     }
 
     const client = await clientPromise;
@@ -92,7 +102,7 @@ export async function GET(
       .collection('properties')
       .findOne({
         userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
@@ -101,7 +111,7 @@ export async function GET(
 
     // Find the guidebook in the property
     const guidebook = property.guidebooks.find(
-      (g: any) => g.guidebookId === params.id
+      (g: any) => g.guidebookId === id
     );
 
     return NextResponse.json(guidebook);
@@ -111,14 +121,16 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const id = extractIdFromUrl(request.url);
+    if (!id) {
+      return new NextResponse('Invalid guidebook ID', { status: 400 });
     }
 
     const client = await clientPromise;
@@ -129,7 +141,7 @@ export async function DELETE(
       .collection('properties')
       .findOne({
         userId,
-        'guidebooks.guidebookId': params.id,
+        'guidebooks.guidebookId': id,
       });
 
     if (!property) {
@@ -140,8 +152,8 @@ export async function DELETE(
     const result = await db
       .collection('properties')
       .updateOne(
-        { userId, 'guidebooks.guidebookId': params.id },
-        { $pull: { guidebooks: { guidebookId: params.id } } } as any
+        { userId, 'guidebooks.guidebookId': id },
+        { $pull: { guidebooks: { guidebookId: id } } } as any
       );
 
     if (result.modifiedCount === 0) {

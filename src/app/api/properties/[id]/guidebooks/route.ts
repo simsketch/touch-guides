@@ -2,15 +2,18 @@ import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
+import { extractIdFromUrl } from '@/lib/url-helpers';
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request) {
   try {
     const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const id = extractIdFromUrl(request.url);
+    if (!id) {
+      return new NextResponse('Invalid property ID', { status: 400 });
     }
 
     const data = await request.json();
@@ -20,7 +23,7 @@ export async function POST(
     // Find the property and verify ownership
     const property = await db
       .collection('properties')
-      .findOne({ _id: new ObjectId(params.id), userId });
+      .findOne({ _id: new ObjectId(id), userId });
 
     if (!property) {
       return new NextResponse('Property not found', { status: 404 });
@@ -38,7 +41,7 @@ export async function POST(
     const result = await db
       .collection('properties')
       .findOneAndUpdate(
-        { _id: new ObjectId(params.id), userId },
+        { _id: new ObjectId(id), userId },
         { 
           $push: { guidebooks: guidebook },
           $set: { updatedAt: new Date() }

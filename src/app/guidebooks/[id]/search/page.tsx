@@ -68,7 +68,7 @@ export default function GuidebookSearchPage() {
               Search Not Available
             </h1>
             <p className="text-gray-600 text-center leading-relaxed">
-              We couldn't load the search for this guidebook. Please check the URL and try again.
+              We couldn&apos;t load the search for this guidebook. Please check the URL and try again.
             </p>
             <div className="mt-6 flex justify-center">
               <button 
@@ -133,7 +133,7 @@ export default function GuidebookSearchPage() {
             ) : (
               <div className="glass hover-lift transition-all duration-500 rounded-2xl overflow-hidden">
                 <div className="p-4 text-center text-gray-600">
-                  No results found for "{searchQuery}"
+                  No results found for &quot;{searchQuery}&quot;
                 </div>
               </div>
             )}
