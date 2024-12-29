@@ -45,11 +45,15 @@ export default function DashboardPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Dashboard - My Properties</h1>
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="button-gradient group relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
           onClick={handleAddProperty}
           disabled={isAdding}
         >
-          {isAdding ? 'Adding...' : 'Add Property'}
+          <div className="gradient-glow"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>{isAdding ? 'Adding...' : 'Add Property'}</span>
         </button>
       </div>
 
@@ -58,6 +62,18 @@ export default function DashboardPage() {
           {error}
         </div>
       )}
+      
+      <div className="mb-8 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 p-6 shadow-sm">
+        <h2 className="text-xl font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+          Welcome to TouchGuides
+        </h2>
+        <p className="text-gray-700 mb-3">
+          Create and manage your property guidebooks with ease. Each property can have multiple guidebooks, perfect for different units or purposes.
+        </p>
+        <p className="text-gray-600 text-sm">
+          <em>Need help? Visit our <a href="https://touchguides.com/contact" className="text-purple-600 hover:text-purple-700 underline">support page</a> or click the Support link in the navigation bar.</em>
+        </p>
+      </div>
       
       {properties && properties.length > 0 ? (
         <PropertyList properties={properties} />
