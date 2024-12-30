@@ -4,7 +4,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 export default function CustomUserButton() {
   return (
     <UserButton
-      afterSignOutUrl="/"
+      afterSignOutUrl="/sign-in"
       appearance={{
         elements: {
           avatarBox: "h-8 w-8",

@@ -13,9 +13,9 @@ export const metadata: Metadata = {
   title: 'TouchGuides - Digital Guidebooks for Vacation Homes',
   description: 'Create and manage digital guidebooks for your vacation rental properties',
   icons: {
-    icon: '/icon.png', // place icon.png in the public folder
-    shortcut: '/shortcut-icon.png',
-    apple: '/apple-icon.png',
+    icon: '/favicon.png', // place logo.png in the public folder
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
     // other icon sizes if needed
   }
 }

@@ -109,7 +109,9 @@ export default function SettingsPage() {
               Upgrade to Pro
             </button>
             <button
-              onClick={() => signOut()}
+              onClick={() => signOut(() => {
+                window.location.href = '/';
+              })}
               className="text-red-500 hover:text-red-600 animated-border px-4 py-2 rounded-full w-full"
             >
               Sign Out

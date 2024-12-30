@@ -5,8 +5,10 @@ export default authMiddleware({
   // Routes that don't require authentication
   publicRoutes: [
     "/",
-    "/sign-in(.*)",
-    "/sign-up(.*)",
+    "/sign-in",
+    "/sign-in/(.*)",
+    "/sign-up",
+    "/sign-up/(.*)",
     "/pricing",
     "/guidebooks/(.*)/view",
     "/api(.*)", // Make all API routes public for now
