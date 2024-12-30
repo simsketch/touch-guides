@@ -15,9 +15,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 function HomeContent({ guidebook }: { guidebook: Guidebook }) {
   const { user, isLoaded } = useUser();
-  const [isMounted, setIsMounted] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   useEffect(() => {
@@ -29,8 +29,8 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
       await navigator.clipboard.writeText(window.location.href);
       setShowShareToast(true);
       setTimeout(() => setShowShareToast(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy URL:', err);
+    } catch (error) {
+      console.error('Failed to copy URL:', error);
     }
   };
 
@@ -40,28 +40,20 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
       const response = await fetch(`/api/guidebooks/${guidebook.guidebookId}/pdf`);
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate PDF');
+        throw new Error('Failed to generate PDF');
       }
 
-      if (response.headers.get('Content-Type') === 'application/pdf') {
-        // It's a PDF, download it
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${guidebook.title.replace(/\s+/g, '-').toLowerCase()}-guide.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        // It's an error response
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate PDF');
-      }
-    } catch (err) {
-      console.error('Failed to download PDF:', err);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${guidebook.title.toLowerCase().replace(/\s+/g, '-')}-guide.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 3000);
     } finally {
@@ -92,7 +84,7 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
             <button
               onClick={handleDownloadPdf}
               disabled={isPdfLoading}
-              className="hidden px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all flex items-center space-x-2 disabled:opacity-50"
+              className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all flex items-center space-x-2 disabled:opacity-50"
             >
               {isPdfLoading ? (
                 <>
@@ -159,19 +151,6 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
         }`}
       >
         Failed to generate PDF. Please try again.
-      </div>
-
-      {/* Get Started Button */}
-      <div className="absolute bottom-64 left-0 right-0 flex justify-center">
-        <button 
-          onClick={() => {
-            const element = document.getElementById('welcome');
-            element?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="px-8 py-3 bg-white text-black rounded-full font-medium hover:bg-opacity-90 transition-all"
-        >
-          GET STARTED
-        </button>
       </div>
     </div>
   );
