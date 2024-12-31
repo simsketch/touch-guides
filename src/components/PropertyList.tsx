@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useProperties } from '@/hooks/useProperties';
 import { useUser } from '@clerk/nextjs';
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HomeIcon } from '@heroicons/react/24/outline';
 
@@ -102,110 +102,167 @@ export default function PropertyList({ properties }: PropertyListProps) {
     );
   }
 
-  const PropertyCard = ({ property }: { property: Property }) => (
-    <div className="glass p-6 rounded-2xl hover:shadow-lg transition-all duration-300 h-[300px] flex flex-col">
-      <div className="flex flex-col items-center mb-4">
-        <HomeIcon className="w-12 h-12 mb-3 text-purple-500 float" />
-        <div className="w-full flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 truncate max-w-[200px]">
-              {property.name}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              {property.guidebooks.length} Guidebook{property.guidebooks.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => router.push(`/properties/${property.propertyId}/edit`)}
-              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-300 rounded"
-              title="Edit Property"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-label="Edit">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-              </svg>
-            </button>
-            <button
-              onClick={() => handleDeleteProperty(property.propertyId)}
-              className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-300 disabled:opacity-50 rounded"
-              disabled={isUpdating === property.propertyId}
-              title="Delete Property"
-            >
-              {isUpdating === property.propertyId ? (
-                <LoadingSpinner />
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-label="Delete">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+  const PropertyCard = ({ property }: { property: Property }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    
+    // Play video once on mount
+    useEffect(() => {
+      const video = videoRef.current;
+      if (video) {
+        // Small delay to ensure smooth initial animation
+        const timer = setTimeout(() => {
+          video.play().catch(err => {
+            console.error('Error playing video on load:', err);
+          });
+        }, 100);
 
-      <div className="flex-1 flex flex-col">
-        <div className="flex justify-between items-center mb-3">
-          <h4 className="font-medium">Guidebooks</h4>
-          <button
-            className="button-gradient group relative flex items-center space-x-1 px-1.5 py-1.5 rounded-lg hover:shadow-lg transition-all duration-300 text-sm"
-            onClick={() => handleAddGuidebook(property.propertyId)}
-            disabled={isUpdating === property.propertyId}
-            title="Add Guidebook"
-            aria-label="Add Guidebook"
+        return () => clearTimeout(timer);
+      }
+    }, []);
+    
+    const handleMouseEnter = useCallback(() => {
+      const video = videoRef.current;
+      if (video) {
+        // Reset to start and play
+        video.currentTime = 0;
+        video.play().catch(err => {
+          console.error('Error playing video on hover:', err);
+        });
+      }
+    }, []);
+    
+    const handleMouseLeave = useCallback(() => {
+      const video = videoRef.current;
+      if (video) {
+        // Let the current play finish
+        const finishPlayback = () => {
+          video.pause();
+          video.currentTime = 0;
+          video.removeEventListener('ended', finishPlayback);
+        };
+        video.addEventListener('ended', finishPlayback);
+      }
+    }, []);
+
+    return (
+      <div className="glass p-6 rounded-2xl hover:shadow-lg transition-all duration-300 h-[300px] flex flex-col relative">
+        <div 
+          className="absolute -top-14 left-1/2 transform -translate-x-1/2 w-24 h-24"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover"
           >
-            <div className="gradient-glow"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span>Add Guidebook</span>
-          </button>
+            <source src="/home-animation.webm" type="video/webm" />
+          </video>
         </div>
-        <div className="flex-1 bg-white/50 rounded-lg py-3 overflow-y-auto">
-          {property.guidebooks.length > 0 ? (
-            <ul className="space-y-2">
-              {property.guidebooks.map((guidebook) => (
-                <li key={guidebook.guidebookId} className="flex items-center justify-between">
-                  <Link
-                    href={`/guidebooks/${guidebook.guidebookId}/view`}
-                    className="text-blue-600 hover:text-blue-700 transition-colors duration-300"
-                  >
-                    {guidebook.title || 'Untitled Guidebook'}
-                  </Link>
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/guidebooks/${guidebook.guidebookId}/edit`}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                      </svg>
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteGuidebook(property.propertyId, guidebook.guidebookId)}
-                      className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 disabled:opacity-50 rounded"
-                      disabled={isUpdating === guidebook.guidebookId}
-                    >
-                      {isUpdating === guidebook.guidebookId ? (
-                        <LoadingSpinner />
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-center py-6 text-gray-500">
-              No guidebooks yet
+        <div className="flex flex-col items-center mb-4 mt-12">
+          <div className="w-full flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 truncate max-w-[200px]">
+                {property.name}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {property.guidebooks.length} Guidebook{property.guidebooks.length !== 1 ? 's' : ''}
+              </p>
             </div>
-          )}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => router.push(`/properties/${property.propertyId}/edit`)}
+                className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-300 rounded"
+                title="Edit Property"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-label="Edit">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+              </button>
+              <button
+                onClick={() => handleDeleteProperty(property.propertyId)}
+                className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-300 disabled:opacity-50 rounded"
+                disabled={isUpdating === property.propertyId}
+                title="Delete Property"
+              >
+                {isUpdating === property.propertyId ? (
+                  <LoadingSpinner />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-label="Delete">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="font-medium">Guidebooks</h4>
+            <button
+              className="button-gradient group relative flex items-center space-x-1 px-1.5 py-1.5 rounded-lg hover:shadow-lg transition-all duration-300 text-sm"
+              onClick={() => handleAddGuidebook(property.propertyId)}
+              disabled={isUpdating === property.propertyId}
+              title="Add Guidebook"
+              aria-label="Add Guidebook"
+            >
+              <div className="gradient-glow"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>Add Guidebook</span>
+            </button>
+          </div>
+          <div className="flex-1 bg-white/50 rounded-lg py-3 overflow-y-auto">
+            {property.guidebooks.length > 0 ? (
+              <ul className="space-y-2">
+                {property.guidebooks.map((guidebook) => (
+                  <li key={guidebook.guidebookId} className="flex items-center justify-between">
+                    <Link
+                      href={`/guidebooks/${guidebook.guidebookId}/view`}
+                      className="text-blue-600 hover:text-blue-700 transition-colors duration-300"
+                    >
+                      {guidebook.title || 'Untitled Guidebook'}
+                    </Link>
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        href={`/guidebooks/${guidebook.guidebookId}/edit`}
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteGuidebook(property.propertyId, guidebook.guidebookId)}
+                        className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 disabled:opacity-50 rounded"
+                        disabled={isUpdating === guidebook.guidebookId}
+                      >
+                        {isUpdating === guidebook.guidebookId ? (
+                          <LoadingSpinner />
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                No guidebooks yet
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const PropertyRow = ({ property }: { property: Property }) => (
     <div className="glass p-4 rounded-xl hover:shadow-lg transition-all duration-300 mb-4">
@@ -301,7 +358,7 @@ export default function PropertyList({ properties }: PropertyListProps) {
     <div>
       <ViewToggle />
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {properties.map((property) => (
             <PropertyCard key={property.propertyId} property={property} />
           ))}

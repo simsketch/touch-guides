@@ -10,6 +10,7 @@ import { HomeIcon, EnvelopeIcon, ShareIcon, DocumentArrowDownIcon } from '@heroi
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,14 +20,16 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [pageUrl, setPageUrl] = useState('');
 
   useEffect(() => {
     setIsMounted(true);
+    setPageUrl(window.location.href);
   }, []);
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(pageUrl);
       setShowShareToast(true);
       setTimeout(() => setShowShareToast(false), 2000);
     } catch (error) {
@@ -131,6 +134,11 @@ function HomeContent({ guidebook }: { guidebook: Guidebook }) {
                 {guidebook.contactEmail}
               </a>
             )}
+          </div>
+          
+          {/* QR Code */}
+          <div className="mt-8 p-4 bg-white rounded-xl">
+            <QRCodeSVG value={pageUrl} size={128} />
           </div>
         </div>
       </div>
