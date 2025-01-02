@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (isLoaded && !user) {
-      router.replace('https://touchguides.com');
+      router.replace(`${process.env.NEXT_PUBLIC_WEBSITE_URL}`);
     }
   }, [router, user, isLoaded]);
 
@@ -79,7 +79,7 @@ export default function DashboardPage() {
           Create and manage your property guidebooks with ease. Each property can have multiple guidebooks, perfect for different units or purposes.
         </p>
         <p className="text-gray-600 text-sm">
-          <em>Need help? Visit our <a href="https://touchguides.com/contact" className="text-purple-600 hover:text-purple-700 underline">support page</a> or click the Support link in the navigation bar.</em>
+          <em>Need help? Visit our <a href={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/contact`} className="text-purple-600 hover:text-purple-700 underline">support page</a> or click the Support link in the navigation bar.</em>
         </p>
       </div>
       

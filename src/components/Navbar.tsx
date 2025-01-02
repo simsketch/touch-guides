@@ -6,7 +6,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, SparklesIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import LoadingSpinner from './LoadingSpinner';
 
 type UserMetadata = {
@@ -18,9 +18,12 @@ type UserMetadata = {
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isLoaded } = useUser();
   const metadata = user?.publicMetadata as UserMetadata;
   const isPremium = metadata?.isPremium === true;
+  const isAuthPage = pathname?.startsWith('/sign-in') || pathname?.startsWith('/sign-up');
+  const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://touchguides.com';
 
   return (
     <>
@@ -94,11 +97,11 @@ export default function Navbar() {
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="text-xl font-bold text-blue-600">
+            <a href={websiteUrl} className="text-xl font-bold text-blue-600">
               <div className="flex items-center">
                 <Image src="/logo.png" alt="TouchGuides Logo" width={250} height={56} className="h-8 w-auto mr-2" />
               </div>
-            </Link>
+            </a>
 
             <div className="flex-1 flex space-x-6 ml-10">
               {!isLoaded ? null : user ? (
@@ -111,15 +114,17 @@ export default function Navbar() {
                   </Link>
                 )
               ) : (
-                <Link
-                  href="/pricing"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Pricing
-                </Link>
+                !isAuthPage && (
+                  <Link
+                    href="/pricing"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    Pricing
+                  </Link>
+                )
               )}
                 <Link
-                  href="https://touchguides.com/contact"
+                  href={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/contact`}
                   className="text-gray-600 hover:text-gray-900"
                 >
                   Support
@@ -215,18 +220,20 @@ export default function Navbar() {
                   </Transition>
                 </Menu>
               ) : (
-                <>
-                  <SignInButton mode="modal" redirectUrl="/dashboard">
-                    <button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-                      Sign Up
-                    </button>
-                  </SignInButton>
-                  <SignInButton mode="modal" redirectUrl="/dashboard">
-                    <button className="text-gray-600 hover:text-gray-900">
-                      Log In
-                    </button>
-                  </SignInButton>
-                </>
+                !isAuthPage && (
+                  <>
+                    <SignInButton mode="modal" redirectUrl="/dashboard">
+                      <button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                        Sign Up
+                      </button>
+                    </SignInButton>
+                    <SignInButton mode="modal" redirectUrl="/dashboard">
+                      <button className="text-gray-600 hover:text-gray-900">
+                        Log In
+                      </button>
+                    </SignInButton>
+                  </>
+                )
               )}
             </div>
           </div>
