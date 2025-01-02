@@ -1,16 +1,24 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropertyList from '@/components/PropertyList';
 import { useProperties } from '@/hooks/useProperties';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { properties, isLoading, addProperty } = useProperties(user?.id ?? null);
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.replace('https://touchguides.com');
+    }
+  }, [router, user, isLoaded]);
 
   if (!user && !isLoading) {
     return (

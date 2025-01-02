@@ -10,10 +10,12 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
-      router.push('/dashboard');
+    if (isLoaded && user) {
+      router.replace('/dashboard');
+    } else if (isLoaded && !user) {
+      router.replace('https://touchguides.com');
     }
-  }, [router, user]);
+  }, [router, user, isLoaded]);
 
   // Show loading screen while checking auth state
   if (!isLoaded) {
@@ -22,6 +24,11 @@ export default function HomePage() {
         <div className="login-loading-bar"></div>
       </div>
     );
+  }
+
+  // Only show landing page for non-authenticated users
+  if (user) {
+    return <div className="min-h-screen" />; // Blank page while redirecting
   }
 
   // Show landing page for non-authenticated users
@@ -36,20 +43,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Help your guests have the best experience by providing them with detailed information about your vacation rental property.
           </p>
-          {user ? (
-            <Link
-              href="/dashboard"
-              className="bg-blue-500 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-600 transition-colors inline-block"
-            >
-              Go to Dashboard
-            </Link>
-          ) : (
-            <SignInButton mode="modal" afterSignInUrl="/dashboard">
-              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-600 transition-colors">
-                Get Started
-              </button>
-            </SignInButton>
-          )}
+          <SignInButton mode="modal" afterSignInUrl="/dashboard">
+            <button className="bg-blue-500 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-600 transition-colors">
+              Get Started
+            </button>
+          </SignInButton>
         </div>
       </section>
 
