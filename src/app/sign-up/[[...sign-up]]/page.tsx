@@ -1,9 +1,23 @@
 'use client';
 
-import { SignUp } from "@clerk/nextjs";
-import Image from "next/image";
+import { SignUp, useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      router.push('/dashboard');
+    }
+  }, [isLoaded, user, router]);
+
+  if (!isLoaded || user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#5A8FF6]">
       {/* Sunset gradient background */}
